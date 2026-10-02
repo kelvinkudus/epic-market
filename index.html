@@ -3,44 +3,85 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Epic Market v01.0</title>
+<title>Epic Market v01.1</title>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, sans-serif; }
-  body { background: #0f1115; color: #e8e8e8; min-height: 100vh; display: flex; flex-direction: column; }
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, sans-serif; -webkit-tap-highlight-color: transparent; }
+  body { background: #0f1115; color: #e8e8e8; min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; }
+
+  /* ===== ANIMASI GLOBAL ===== */
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes scaleIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+  @keyframes pop { 0% { transform: scale(0.8); } 50% { transform: scale(1.15); } 100% { transform: scale(1); } }
+  @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+  @keyframes floatUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes confetti { 0% { transform: translateY(0) rotate(0); opacity: 1; } 100% { transform: translateY(-200px) rotate(720deg); opacity: 0; } }
+  @keyframes glowGold { from { box-shadow: 0 0 6px #d4af37; } to { box-shadow: 0 0 20px #ffe680, 0 0 30px #d4af37; } }
+  @keyframes glowPurple { from { box-shadow: 0 0 8px #8a2be2; } to { box-shadow: 0 0 24px #d38bff, 0 0 36px #8a2be2; } }
+
+  .fade-in { animation: fadeIn 0.35s ease forwards; }
+  .slide-up { animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+  .scale-in { animation: scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
 
   header { background: #171a21; padding: 12px 16px; display: flex; justify-content: space-between;
     align-items: center; border-bottom: 1px solid #2a2f3a; position: sticky; top: 0; z-index: 100; gap: 8px; }
   .logo { font-weight: bold; font-size: 1rem; color: #ffd76a; white-space: nowrap; }
   .currencies { display: flex; gap: 8px; font-size: 0.78rem; flex-wrap: wrap; justify-content: flex-end; }
-  .currencies span { background: #222733; padding: 4px 10px; border-radius: 8px; white-space: nowrap; }
+  .currencies span { background: #222733; padding: 4px 10px; border-radius: 8px; white-space: nowrap;
+    transition: transform 0.3s, background 0.3s; }
+  .currencies span.changed { animation: pop 0.5s ease; background: #3a4a6b; }
 
   nav { display: flex; background: #171a21; border-bottom: 1px solid #2a2f3a;
-    position: sticky; top: 53px; z-index: 99; }
-  nav button { flex: 1; padding: 12px; background: none; border: none; color: #8b93a7;
-    font-size: 0.9rem; cursor: pointer; border-bottom: 3px solid transparent; transition: 0.2s; }
+    position: sticky; top: 53px; z-index: 99; overflow-x: auto; }
+  nav button { flex: 1; min-width: 80px; padding: 12px 8px; background: none; border: none;
+    color: #8b93a7; font-size: 0.85rem; cursor: pointer; border-bottom: 3px solid transparent;
+    transition: 0.25s; position: relative; white-space: nowrap; }
   nav button.active { color: #ffd76a; border-bottom-color: #ffd76a; }
+  nav button .notif-dot { position: absolute; top: 8px; right: 12px; width: 8px; height: 8px;
+    background: #e74c3c; border-radius: 50%; animation: pop 0.5s ease; }
 
   main { flex: 1; padding: 16px; max-width: 900px; width: 100%; margin: 0 auto; }
+  main > section { animation: fadeIn 0.3s ease; }
 
-  .sub-tabs { display: flex; gap: 8px; margin-bottom: 14px; }
+  .sub-tabs { display: flex; gap: 8px; margin-bottom: 14px; overflow-x: auto; padding-bottom: 4px; }
   .sub-tabs button { padding: 8px 16px; background: #222733; border: 1px solid #2a2f3a;
-    color: #8b93a7; border-radius: 8px; cursor: pointer; font-size: 0.85rem; }
-  .sub-tabs button.active { background: #ffd76a; color: #111; font-weight: bold; }
+    color: #8b93a7; border-radius: 8px; cursor: pointer; font-size: 0.85rem; white-space: nowrap;
+    transition: 0.25s; }
+  .sub-tabs button.active { background: #ffd76a; color: #111; font-weight: bold; transform: scale(1.03); }
 
   .search-bar { margin-bottom: 12px; }
   .search-bar input { width: 100%; padding: 10px 14px; border-radius: 10px;
-    border: 1px solid #2a2f3a; background: #1c202b; color: #e8e8e8; outline: none; font-size: 0.9rem; }
+    border: 1px solid #2a2f3a; background: #1c202b; color: #e8e8e8; outline: none; font-size: 0.9rem;
+    transition: border 0.2s; }
   .search-bar input:focus { border-color: #556b9e; }
 
-  .filters { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
-  .filters button { padding: 6px 12px; font-size: 0.78rem; background: #1c202b;
-    border: 1px solid #2a2f3a; color: #8b93a7; border-radius: 20px; cursor: pointer; transition: 0.2s; }
-  .filters button.active { background: #3a4a6b; color: #fff; border-color: #556b9e; }
+  /* ===== SIDEBAR KRITERIA (COLLAPSIBLE) ===== */
+  .criteria-box { background: #1c202b; border: 1px solid #2a2f3a; border-radius: 12px;
+    margin-bottom: 14px; overflow: hidden; transition: all 0.3s; }
+  .criteria-header { display: flex; justify-content: space-between; align-items: center;
+    padding: 12px 14px; cursor: pointer; user-select: none; transition: background 0.2s; }
+  .criteria-header:hover { background: #222733; }
+  .criteria-title { font-size: 0.85rem; font-weight: bold; color: #ffd76a; }
+  .criteria-toggle { font-size: 0.8rem; color: #8b93a7; transition: transform 0.3s; }
+  .criteria-box.collapsed .criteria-toggle { transform: rotate(-90deg); }
+  .criteria-body { padding: 0 14px 14px; max-height: 500px; overflow: hidden;
+    transition: max-height 0.35s ease, opacity 0.25s, padding 0.3s; }
+  .criteria-box.collapsed .criteria-body { max-height: 0; opacity: 0; padding: 0 14px; }
+  .criteria-group { margin-top: 10px; }
+  .criteria-group-title { font-size: 0.72rem; color: #8b93a7; text-transform: uppercase;
+    letter-spacing: 1px; margin-bottom: 6px; }
+  .criteria-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+  .criteria-chips button { padding: 6px 12px; font-size: 0.78rem; background: #0f1115;
+    border: 1px solid #2a2f3a; color: #8b93a7; border-radius: 20px; cursor: pointer;
+    transition: 0.2s; }
+  .criteria-chips button.active { background: #3a4a6b; color: #fff; border-color: #556b9e; }
 
   .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
 
   .item-card { border-radius: 12px; padding: 12px; cursor: pointer; border: 2px solid transparent;
-    transition: transform 0.15s, box-shadow 0.2s; position: relative; overflow: hidden; }
+    transition: transform 0.2s, box-shadow 0.2s; position: relative; overflow: hidden;
+    animation: fadeIn 0.3s ease; }
+  .item-card:active { transform: scale(0.97); }
   .item-card:hover { transform: translateY(-3px); }
 
   .rarity-Normal { background: #ffffff; color: #111; }
@@ -50,8 +91,6 @@
     animation: glowGold 2s ease-in-out infinite alternate; }
   .rarity-Mighty { background: linear-gradient(135deg, #6a0dad, #b06fe0); color: #fff;
     animation: glowPurple 2s ease-in-out infinite alternate; }
-  @keyframes glowGold { from { box-shadow: 0 0 6px #d4af37; } to { box-shadow: 0 0 20px #ffe680, 0 0 30px #d4af37; } }
-  @keyframes glowPurple { from { box-shadow: 0 0 8px #8a2be2; } to { box-shadow: 0 0 24px #d38bff, 0 0 36px #8a2be2; } }
 
   .badge { position: absolute; top: 8px; right: 8px; font-size: 0.6rem; padding: 2px 8px;
     border-radius: 10px; background: rgba(0,0,0,0.35); color: #fff; font-weight: bold; }
@@ -61,35 +100,42 @@
   .item-stock { font-size: 0.72rem; opacity: 0.75; margin-top: 2px; }
   .owner-tag { font-size: 0.65rem; margin-top: 6px; padding: 2px 6px; border-radius: 6px;
     background: rgba(0,0,0,0.3); display: inline-block; }
+  .seller-badge { font-size: 0.65rem; margin-left: 4px; }
 
+  /* ===== MODAL ===== */
   .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); display: none;
-    justify-content: center; align-items: center; z-index: 200; padding: 16px; }
-  .modal-overlay.show { display: flex; }
+    justify-content: center; align-items: center; z-index: 200; padding: 16px;
+    backdrop-filter: blur(4px); }
+  .modal-overlay.show { display: flex; animation: fadeIn 0.2s ease; }
   .modal { background: #1c202b; padding: 20px; border-radius: 14px; width: 100%; max-width: 420px;
-    border: 1px solid #2a2f3a; max-height: 90vh; overflow-y: auto; }
+    border: 1px solid #2a2f3a; max-height: 90vh; overflow-y: auto;
+    animation: scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
   .modal h3 { margin-bottom: 10px; }
   .modal .row { display: flex; justify-content: space-between; padding: 6px 0;
     font-size: 0.88rem; color: #b8c0d0; }
   .modal .row b { color: #fff; }
   .modal input, .modal textarea { width: 100%; padding: 8px 10px; margin-top: 6px;
     border-radius: 8px; border: 1px solid #2a2f3a; background: #0f1115;
-    color: #e8e8e8; outline: none; font-family: inherit; }
+    color: #e8e8e8; outline: none; font-family: inherit; font-size: 0.9rem; }
   .modal input:focus, .modal textarea:focus { border-color: #556b9e; }
   .modal textarea { resize: vertical; min-height: 70px; }
   .modal label { font-size: 0.85rem; color: #b8c0d0; display: block; margin-top: 10px; }
   .hint { font-size: 0.72rem; color: #8b93a7; margin-top: 4px; }
 
   .btn { padding: 10px 14px; border-radius: 10px; border: none; cursor: pointer;
-    font-weight: bold; font-size: 0.88rem; transition: 0.2s; }
+    font-weight: bold; font-size: 0.88rem; transition: transform 0.15s, filter 0.2s; }
   .btn:hover { filter: brightness(1.1); }
+  .btn:active { transform: scale(0.96); }
   .btn:disabled { opacity: 0.5; cursor: not-allowed; }
   .btn-primary { background: #ffd76a; color: #111; }
   .btn-secondary { background: #2a2f3a; color: #e8e8e8; }
   .btn-danger { background: #c0392b; color: #fff; }
+  .btn-success { background: #27ae60; color: #fff; }
   .btn-row { display: flex; gap: 8px; margin-top: 14px; }
   .btn-row .btn { flex: 1; }
 
-  .profile-card { background: #1c202b; padding: 20px; border-radius: 14px; border: 1px solid #2a2f3a; }
+  .profile-card { background: #1c202b; padding: 20px; border-radius: 14px; border: 1px solid #2a2f3a;
+    animation: fadeIn 0.3s ease; }
   .profile-card h2 { margin-bottom: 4px; }
   .profile-card .uid { color: #8b93a7; font-size: 0.8rem; margin-bottom: 10px; word-break: break-all; }
   .profile-card .desc { color: #b8c0d0; font-size: 0.9rem; line-height: 1.5; min-height: 40px; }
@@ -97,17 +143,17 @@
 
   .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(120px);
     background: #2a2f3a; color: #fff; padding: 10px 20px; border-radius: 30px; font-size: 0.85rem;
-    transition: transform 0.3s; z-index: 300; border: 1px solid #3a4a6b;
+    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1); z-index: 300; border: 1px solid #3a4a6b;
     box-shadow: 0 4px 20px rgba(0,0,0,0.5); max-width: 90vw; text-align: center; }
   .toast.show { transform: translateX(-50%) translateY(0); }
 
   .empty { text-align: center; color: #8b93a7; padding: 30px 16px; font-size: 0.88rem; line-height: 1.6; }
 
-  /* AUTH SCREEN */
   .auth-screen { position: fixed; inset: 0; background: #0f1115; display: flex;
     justify-content: center; align-items: center; z-index: 500; padding: 16px; }
   .auth-card { background: #1c202b; padding: 28px 22px; border-radius: 16px; width: 100%;
-    max-width: 360px; border: 1px solid #2a2f3a; text-align: center; }
+    max-width: 360px; border: 1px solid #2a2f3a; text-align: center;
+    animation: scaleIn 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
   .auth-card h1 { color: #ffd76a; font-size: 1.4rem; margin-bottom: 6px; }
   .auth-card p { color: #8b93a7; font-size: 0.85rem; margin-bottom: 20px; line-height: 1.5; }
   .auth-card input { width: 100%; padding: 11px 14px; margin-bottom: 10px; border-radius: 10px;
@@ -126,11 +172,106 @@
     border-top-color: #ffd76a; border-radius: 50%; animation: spin 0.8s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
+  /* ===== MISI HARIAN ===== */
+  .mission-section { margin-top: 20px; }
+  .mission-header { display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 10px; }
+  .mission-header h3 { font-size: 0.95rem; }
+  .mission-header .reset-info { font-size: 0.7rem; color: #8b93a7; }
+  .mission-card { background: #1c202b; border: 1px solid #2a2f3a; border-radius: 12px;
+    padding: 12px 14px; margin-bottom: 8px; display: flex; align-items: center; gap: 12px;
+    transition: transform 0.2s, border 0.2s; animation: fadeIn 0.3s ease; }
+  .mission-card:hover { transform: translateX(3px); }
+  .mission-card.done { border-color: #27ae60; background: #1a2620; }
+  .mission-card.claimed { opacity: 0.5; border-color: #2a2f3a; }
+  .mission-icon { font-size: 1.5rem; flex-shrink: 0; }
+  .mission-info { flex: 1; }
+  .mission-title { font-weight: bold; font-size: 0.85rem; margin-bottom: 3px; }
+  .mission-reward { font-size: 0.72rem; color: #ffd76a; }
+  .mission-progress { font-size: 0.7rem; color: #8b93a7; margin-top: 3px; }
+  .mission-btn { padding: 6px 12px; font-size: 0.75rem; border-radius: 8px; flex-shrink: 0; }
+  .mission-btn.claimed { background: #2a2f3a; color: #8b93a7; cursor: default; }
+
+  /* ===== REDEEM ===== */
+  .redeem-card { background: #1c202b; border: 1px solid #2a2f3a; border-radius: 14px;
+    padding: 20px; animation: fadeIn 0.3s ease; }
+  .redeem-card h3 { margin-bottom: 6px; }
+  .redeem-card p { color: #8b93a7; font-size: 0.85rem; margin-bottom: 16px; line-height: 1.5; }
+  .redeem-input-row { display: flex; gap: 8px; }
+  .redeem-input-row input { flex: 1; padding: 12px 14px; border-radius: 10px;
+    border: 1px solid #2a2f3a; background: #0f1115; color: #e8e8e8; outline: none;
+    font-size: 0.95rem; text-transform: uppercase; letter-spacing: 1px; font-family: monospace; }
+  .redeem-input-row input:focus { border-color: #ffd76a; }
+  .redeem-history { margin-top: 20px; }
+  .redeem-history h4 { font-size: 0.85rem; color: #8b93a7; margin-bottom: 8px; }
+  .redeem-item { padding: 8px 12px; background: #0f1115; border: 1px solid #2a2f3a;
+    border-radius: 8px; margin-bottom: 6px; display: flex; justify-content: space-between;
+    font-size: 0.8rem; animation: fadeIn 0.3s ease; }
+  .redeem-item .code { font-family: monospace; color: #ffd76a; }
+
+  /* ===== CHAT ===== */
+  .chat-list { display: flex; flex-direction: column; gap: 8px; }
+  .chat-room-item { background: #1c202b; border: 1px solid #2a2f3a; border-radius: 12px;
+    padding: 12px 14px; cursor: pointer; transition: 0.2s; display: flex; justify-content: space-between;
+    align-items: center; animation: fadeIn 0.3s ease; }
+  .chat-room-item:hover { border-color: #556b9e; transform: translateX(3px); }
+  .chat-room-item .room-info { flex: 1; }
+  .chat-room-item .room-name { font-weight: bold; font-size: 0.88rem; }
+  .chat-room-item .room-preview { font-size: 0.75rem; color: #8b93a7; margin-top: 3px;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 220px; }
+  .chat-room-item .room-badge { background: #e74c3c; color: #fff; padding: 2px 8px;
+    border-radius: 10px; font-size: 0.7rem; font-weight: bold; }
+
+  .chat-window { display: flex; flex-direction: column; height: calc(100vh - 160px);
+    background: #1c202b; border: 1px solid #2a2f3a; border-radius: 14px; overflow: hidden; }
+  .chat-window-header { padding: 12px 14px; border-bottom: 1px solid #2a2f3a;
+    display: flex; justify-content: space-between; align-items: center; background: #171a21; }
+  .chat-window-header .name { font-weight: bold; font-size: 0.9rem; }
+  .chat-window-header .back { background: none; border: none; color: #ffd76a;
+    cursor: pointer; font-size: 0.9rem; padding: 4px 8px; }
+  .chat-messages { flex: 1; overflow-y: auto; padding: 14px; display: flex;
+    flex-direction: column; gap: 8px; }
+  .chat-msg { max-width: 75%; padding: 8px 12px; border-radius: 12px; font-size: 0.85rem;
+    line-height: 1.4; word-wrap: break-word; animation: fadeIn 0.25s ease; }
+  .chat-msg.mine { align-self: flex-end; background: #3a4a6b; color: #fff;
+    border-bottom-right-radius: 4px; }
+  .chat-msg.theirs { align-self: flex-start; background: #222733; color: #e8e8e8;
+    border-bottom-left-radius: 4px; }
+  .chat-msg .time { font-size: 0.65rem; opacity: 0.6; margin-top: 3px; display: block; }
+  .chat-input-row { display: flex; gap: 8px; padding: 10px; border-top: 1px solid #2a2f3a;
+    background: #171a21; }
+  .chat-input-row input { flex: 1; padding: 10px 14px; border-radius: 10px;
+    border: 1px solid #2a2f3a; background: #0f1115; color: #e8e8e8; outline: none; font-size: 0.88rem; }
+  .chat-input-row input:focus { border-color: #556b9e; }
+  .chat-input-row button { padding: 10px 16px; border-radius: 10px; border: none;
+    background: #ffd76a; color: #111; font-weight: bold; cursor: pointer; }
+
+  /* ===== REWARD ANIMATION ===== */
+  .reward-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85);
+    display: none; justify-content: center; align-items: center; z-index: 700;
+    flex-direction: column; gap: 20px; }
+  .reward-overlay.show { display: flex; animation: fadeIn 0.3s ease; }
+  .reward-box { background: linear-gradient(135deg, #1c202b, #2a2f3a);
+    padding: 30px 40px; border-radius: 20px; border: 2px solid #ffd76a;
+    text-align: center; animation: scaleIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 0 40px rgba(255, 215, 106, 0.4); position: relative; }
+  .reward-emoji { font-size: 4rem; animation: pop 0.6s ease; }
+  .reward-title { font-size: 1.2rem; font-weight: bold; color: #ffd76a; margin: 10px 0; }
+  .reward-desc { font-size: 0.9rem; color: #e8e8e8; }
+  .confetti-piece { position: absolute; width: 8px; height: 8px; opacity: 0;
+    animation: confetti 1.5s ease-out forwards; border-radius: 2px; }
+
+  /* Profil publik */
+  .public-profile-avatar { width: 60px; height: 60px; border-radius: 50%;
+    background: linear-gradient(135deg, #ffd76a, #6a0dad); display: flex;
+    align-items: center; justify-content: center; font-size: 1.8rem; margin: 0 auto 10px; }
+
   @media (max-width: 480px) {
     .currencies { font-size: 0.68rem; }
     .currencies span { padding: 3px 7px; }
     .grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
     .logo { font-size: 0.85rem; }
+    .chat-window { height: calc(100vh - 200px); }
   }
 </style>
 </head>
@@ -161,9 +302,19 @@
   <div id="loadingText">Memuat...</div>
 </div>
 
+<!-- ====== REWARD ANIMATION ====== -->
+<div class="reward-overlay" id="rewardOverlay">
+  <div class="reward-box" id="rewardBox">
+    <div class="reward-emoji" id="rewardEmoji">🎁</div>
+    <div class="reward-title" id="rewardTitle">Hadiah!</div>
+    <div class="reward-desc" id="rewardDesc">+500 Money</div>
+    <button class="btn btn-primary" style="margin-top:16px;" onclick="closeReward()">Klaim</button>
+  </div>
+</div>
+
 <!-- ====== HEADER ====== -->
 <header>
-  <div class="logo">🛒 Epic Market v01.0</div>
+  <div class="logo">🛒 Epic Market v01.1</div>
   <div class="currencies">
     <span id="moneyDisplay">💵 0</span>
     <span id="goldDisplay">🪙 0</span>
@@ -174,6 +325,8 @@
 <nav>
   <button data-tab="home" class="active">🏠 Home</button>
   <button data-tab="market">🛒 Market</button>
+  <button data-tab="chat">💬 Chat<span id="chatBadge"></span></button>
+  <button data-tab="redeem">🎁 Redeem</button>
   <button data-tab="account">👤 Akun</button>
 </nav>
 
@@ -189,6 +342,15 @@
     <div style="margin-top:18px; display:flex; gap:10px; flex-wrap:wrap;">
       <button class="btn btn-primary" onclick="switchTab('market')">🛒 Ke Market</button>
       <button class="btn btn-secondary" id="btnLogout">🚪 Logout</button>
+    </div>
+
+    <!-- MISI HARIAN -->
+    <div class="mission-section">
+      <div class="mission-header">
+        <h3>📋 Misi Harian</h3>
+        <span class="reset-info" id="missionResetInfo">Reset: -</span>
+      </div>
+      <div id="missionList"></div>
     </div>
 
     <div style="margin-top:24px; padding:16px; background:#1c202b; border-radius:12px; border:1px solid #2a2f3a;">
@@ -216,12 +378,46 @@
       <div class="search-bar">
         <input type="text" id="searchInput" placeholder="🔍 Cari item...">
       </div>
-      <div class="filters">
-        <button data-filter="all" class="active">Semua</button>
-        <button data-filter="cheap">Harga ⬇️ (≤💵20.000)</button>
-        <button data-filter="expensive">Harga ⬆️ (≥💵100.000)</button>
-        <button data-filter="popular">Terpopuler</button>
+
+      <!-- SIDEBAR KRITERIA COLLAPSIBLE -->
+      <div class="criteria-box" id="criteriaBox">
+        <div class="criteria-header" onclick="toggleCriteria()">
+          <span class="criteria-title">🎯 Kriteria Pencarian</span>
+          <span class="criteria-toggle">▼</span>
+        </div>
+        <div class="criteria-body">
+          <div class="criteria-group">
+            <div class="criteria-group-title">Harga</div>
+            <div class="criteria-chips" id="filterHarga">
+              <button data-filter="all" class="active">Semua</button>
+              <button data-filter="cheap">⬇️ ≤20.000</button>
+              <button data-filter="expensive">⬆️ ≥100.000</button>
+              <button data-filter="mid">20k-100k</button>
+            </div>
+          </div>
+          <div class="criteria-group">
+            <div class="criteria-group-title">Rarity</div>
+            <div class="criteria-chips" id="filterRarity">
+              <button data-rarity="all" class="active">Semua</button>
+              <button data-rarity="Normal">Normal</button>
+              <button data-rarity="Special">Special</button>
+              <button data-rarity="Epic">Epic</button>
+              <button data-rarity="Myth">Myth</button>
+              <button data-rarity="Mighty">Mighty</button>
+            </div>
+          </div>
+          <div class="criteria-group">
+            <div class="criteria-group-title">Urutkan</div>
+            <div class="criteria-chips" id="filterSort">
+              <button data-sort="newest" class="active">🆕 Terbaru</button>
+              <button data-sort="popular">👁️ Terpopuler</button>
+              <button data-sort="priceAsc">💵 Termurah</button>
+              <button data-sort="priceDesc">💰 Termahal</button>
+            </div>
+          </div>
+        </div>
       </div>
+
       <div class="grid" id="marketGrid"></div>
     </div>
 
@@ -239,6 +435,46 @@
     </div>
   </section>
 
+  <!-- CHAT -->
+  <section id="tab-chat" style="display:none;">
+    <div id="chatListView">
+      <h3 style="margin-bottom:12px;">💬 Chat Saya</h3>
+      <div class="chat-list" id="chatList"></div>
+    </div>
+    <div id="chatWindowView" style="display:none;">
+      <div class="chat-window">
+        <div class="chat-window-header">
+          <button class="back" onclick="closeChatWindow()">← Kembali</button>
+          <span class="name" id="chatPartnerName">...</span>
+          <span style="width:60px;"></span>
+        </div>
+        <div class="chat-messages" id="chatMessages"></div>
+        <div class="chat-input-row">
+          <input type="text" id="chatInput" placeholder="Tulis pesan..." maxlength="300">
+          <button onclick="sendChatMessage()">Kirim</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- REDEEM -->
+  <section id="tab-redeem" style="display:none;">
+    <div class="redeem-card">
+      <h3>🎁 Redeem Code</h3>
+      <p>Masukkan kode untuk klaim hadiah eksklusif!</p>
+
+      <div class="redeem-input-row">
+        <input type="text" id="redeemInput" placeholder="XXXX-XXXX" maxlength="30">
+        <button class="btn btn-primary" onclick="redeemCode()">Klaim</button>
+      </div>
+
+      <div class="redeem-history">
+        <h4>📜 Riwayat Klaim</h4>
+        <div id="redeemHistory"></div>
+      </div>
+    </div>
+  </section>
+
   <!-- ACCOUNT -->
   <section id="tab-account" style="display:none;">
     <div class="profile-card">
@@ -249,10 +485,15 @@
         <button class="btn btn-primary" onclick="openEditProfile()">✏️ Edit Profil</button>
       </div>
     </div>
+
+    <div style="margin-top:16px; background:#1c202b; border:1px solid #2a2f3a; border-radius:14px; padding:16px;">
+      <h3 style="font-size:0.95rem; margin-bottom:10px;">📜 Riwayat Transaksi</h3>
+      <div id="transactionHistory"></div>
+    </div>
   </section>
 </main>
 
-<!-- MODAL ITEM DETAIL -->
+<!-- ====== MODAL ITEM DETAIL ====== -->
 <div class="modal-overlay" id="itemModal">
   <div class="modal">
     <div id="itemModalContent"></div>
@@ -260,7 +501,7 @@
   </div>
 </div>
 
-<!-- MODAL SELL -->
+<!-- ====== MODAL SELL ====== -->
 <div class="modal-overlay" id="sellModal">
   <div class="modal">
     <h3>💸 Jual Item di Market</h3>
@@ -288,7 +529,7 @@
   </div>
 </div>
 
-<!-- MODAL EDIT PROFILE -->
+<!-- ====== MODAL EDIT PROFILE ====== -->
 <div class="modal-overlay" id="editProfileModal">
   <div class="modal">
     <h3>✏️ Edit Profil</h3>
@@ -306,7 +547,7 @@
   </div>
 </div>
 
-<!-- MODAL KONFIRMASI BELI -->
+<!-- ====== MODAL KONFIRMASI BELI ====== -->
 <div class="modal-overlay" id="confirmBuyModal">
   <div class="modal">
     <h3>🛍️ Konfirmasi Pembelian</h3>
@@ -318,9 +559,67 @@
   </div>
 </div>
 
+<!-- ====== MODAL TURUNKAN HARGA ====== -->
+<div class="modal-overlay" id="priceModal">
+  <div class="modal">
+    <h3>💸 Ubah Harga Jual</h3>
+    <p style="font-size:0.78rem; color:#8b93a7; margin-top:4px;">
+      Turunkan harga tanpa perlu tarik listing. Harga baru tidak boleh lebih tinggi dari harga sekarang.
+    </p>
+    <div id="priceChangeItemName" style="margin:12px 0; font-weight:bold;"></div>
+    <div class="row" style="display:flex; justify-content:space-between; font-size:0.85rem; color:#b8c0d0; padding:6px 0;">
+      <span>Harga Sekarang</span><b id="currentPriceDisplay" style="color:#fff;">-</b>
+    </div>
+    <label>Harga Baru (harus ≤ harga sekarang)</label>
+    <input type="number" id="newPrice" placeholder="0">
+    <div class="hint" id="newPriceHint"></div>
+
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="closeModal('priceModal')">Batal</button>
+      <button class="btn btn-primary" onclick="confirmPriceChange()">Ubah Harga</button>
+    </div>
+  </div>
+</div>
+
+<!-- ====== MODAL PROFIL PUBLIK ====== -->
+<div class="modal-overlay" id="publicProfileModal">
+  <div class="modal">
+    <div id="publicProfileContent"></div>
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="closeModal('publicProfileModal')">Tutup</button>
+      <button class="btn btn-primary" id="chatSellerBtn">💬 Chat Penjual</button>
+    </div>
+  </div>
+</div>
+
+<!-- ====== MODAL KONFIRMASI CUSTOM ====== -->
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal">
+    <h3 id="confirmTitle">Konfirmasi</h3>
+    <p id="confirmMessage" style="color:#b8c0d0; font-size:0.9rem; line-height:1.5; margin-top:8px;"></p>
+    <div class="btn-row">
+      <button class="btn btn-secondary" id="confirmCancelBtn">Batal</button>
+      <button class="btn btn-primary" id="confirmOkBtn">Ya</button>
+    </div>
+  </div>
+</div>
+
+<!-- ====== MODAL PROMPT CUSTOM ====== -->
+<div class="modal-overlay" id="promptModal">
+  <div class="modal">
+    <h3 id="promptTitle">Input</h3>
+    <p id="promptMessage" style="color:#b8c0d0; font-size:0.88rem; margin-top:6px;"></p>
+    <input type="number" id="promptInput" placeholder="0">
+    <div class="hint" id="promptHint"></div>
+    <div class="btn-row">
+      <button class="btn btn-secondary" id="promptCancelBtn">Batal</button>
+      <button class="btn btn-primary" id="promptOkBtn">OK</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
-<!-- ====== FIREBASE SDK (v10 modular via CDN) ====== -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import {
@@ -330,7 +629,7 @@ import {
 import {
   getFirestore, doc, setDoc, getDoc, updateDoc, deleteDoc, collection,
   addDoc, query, where, onSnapshot, serverTimestamp, runTransaction,
-  increment, getDocs
+  increment, getDocs, orderBy, limit
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 /* ========= FIREBASE CONFIG ========= */
@@ -353,11 +652,15 @@ const state = {
   profile: { name: "", uid: "", desc: "", money: 0, gold: 0, star: 0 },
   inventory: [],
   listings: [],
+  chats: [],
   currentListing: null,
+  currentChat: null,
   sellTarget: null,
-  unsubProfile: null,
-  unsubInventory: null,
-  unsubListings: null,
+  priceTarget: null,
+  unsubProfile: null, unsubInventory: null, unsubListings: null,
+  unsubChats: null, unsubMessages: null, unsubMissions: null,
+  lastCurrency: { money: 0, gold: 0, star: 0 },
+  criteriaOpen: true,
 };
 
 /* ========= KATALOG ITEM ========= */
@@ -368,11 +671,49 @@ const ITEMS = [
   { id: "necklace", emoji: "🧩", name: "Magic Necklace", rarity: "Mighty", min: 500000, max: 799999 },
 ];
 
+/* ========= REDEEM CODES ========= */
+const REDEEM_CODES = {
+  "EPIC-MARKET": {
+    type: "random_gold_and_item",
+    goldMin: 500, goldMax: 1000,
+    item: "apel", qty: 2,
+    desc: "🪙 500-1000 + 🍎 2",
+  },
+  "RGGC-2044-BT37": {
+    type: "fixed",
+    money: 4000, item: "strawberry", qty: 5,
+    desc: "💵 4.000 + 🍓 5",
+  },
+  "EPIC--2026-MARKET": {
+    type: "fixed",
+    money: 5000, item: "apel", qty: 5,
+    desc: "💵 5.000 + 🍎 5",
+  },
+  "QPB2-APF3-MRKT": {
+    type: "fixed",
+    star: 70,
+    desc: "⭐ 70",
+  },
+};
+
+/* ========= MISI ========= */
+const MISSIONS = [
+  { id: "daily_login", type: "daily", title: "Login setiap hari", icon: "📅",
+    reward: { money: 500 }, rewardText: "+💵500" },
+  { id: "weekly_sell", type: "weekly", title: "Jual item ke market", icon: "🏪",
+    reward: { money: 800 }, rewardText: "+💵800" },
+  { id: "first_sale_bought", type: "once", title: "Jual item & terbeli 1x", icon: "🤝",
+    reward: { gold: 5 }, rewardText: "+🪙5" },
+  { id: "first_chat", type: "once", title: "Chat penjual item", icon: "💬",
+    reward: { gold: 10, money: 500 }, rewardText: "+🪙10 & +💵500" },
+];
+
 /* ========= UTIL ========= */
 const $ = id => document.getElementById(id);
 const getItem = id => ITEMS.find(i => i.id === id);
 const rarityClass = r => "rarity-" + r;
 const formatMoney = n => "💵 " + (n || 0).toLocaleString('id-ID');
+
 function closeModal(id) { $(id).classList.remove("show"); }
 function showLoading(v, txt = "Memuat...") {
   $("loadingText").textContent = txt;
@@ -386,6 +727,88 @@ function showToast(msg) {
   t._timer = setTimeout(() => t.classList.remove("show"), 2400);
 }
 
+/* ===== Custom Confirm & Prompt ===== */
+let _confirmCb = null;
+function showConfirm(title, msg, onOK, okText = "Ya") {
+  $("confirmTitle").textContent = title;
+  $("confirmMessage").textContent = msg;
+  $("confirmOkBtn").textContent = okText;
+  _confirmCb = onOK;
+  $("confirmModal").classList.add("show");
+}
+$("confirmOkBtn").onclick = () => { closeModal("confirmModal"); if (_confirmCb) _confirmCb(); };
+$("confirmCancelBtn").onclick = () => closeModal("confirmModal");
+
+let _promptCb = null;
+function showPrompt(title, msg, onOK, hint = "", defaultValue = "") {
+  $("promptTitle").textContent = title;
+  $("promptMessage").textContent = msg;
+  $("promptHint").textContent = hint;
+  $("promptInput").value = defaultValue;
+  _promptCb = onOK;
+  $("promptModal").classList.add("show");
+  setTimeout(() => $("promptInput").focus(), 100);
+}
+$("promptOkBtn").onclick = () => {
+  const val = $("promptInput").value;
+  closeModal("promptModal");
+  if (_promptCb) _promptCb(val);
+};
+$("promptCancelBtn").onclick = () => closeModal("promptModal");
+
+/* ===== Reward Animation ===== */
+function showReward(emoji, title, desc) {
+  $("rewardEmoji").textContent = emoji;
+  $("rewardTitle").textContent = title;
+  $("rewardDesc").textContent = desc;
+  $("rewardOverlay").classList.add("show");
+
+  // Confetti
+  const box = $("rewardBox");
+  for (let i = 0; i < 20; i++) {
+    const p = document.createElement("div");
+    p.className = "confetti-piece";
+    p.style.left = Math.random() * 100 + "%";
+    p.style.top = "100%";
+    p.style.background = ["#ffd76a","#6a0dad","#27ae60","#e74c3c","#3498db"][Math.floor(Math.random()*5)];
+    p.style.animationDelay = Math.random() * 0.3 + "s";
+    box.appendChild(p);
+    setTimeout(() => p.remove(), 1800);
+  }
+}
+function closeReward() { $("rewardOverlay").classList.remove("show"); }
+window.closeReward = closeReward;
+
+/* ===== Currency animation ===== */
+function updateCurrencyUI() {
+  const moneyEl = $("moneyDisplay"), goldEl = $("goldDisplay"), starEl = $("starDisplay");
+  const m = state.profile.money || 0, g = state.profile.gold || 0, s = state.profile.star || 0;
+
+  moneyEl.textContent = "💵 " + m.toLocaleString('id-ID');
+  goldEl.textContent = "🪙 " + g;
+  starEl.textContent = "⭐ " + s;
+
+  if (state.lastCurrency.money !== m && state.lastCurrency.money !== 0) {
+    moneyEl.classList.add("changed");
+    setTimeout(() => moneyEl.classList.remove("changed"), 500);
+  }
+  if (state.lastCurrency.gold !== g && state.lastCurrency.gold !== 0) {
+    goldEl.classList.add("changed");
+    setTimeout(() => goldEl.classList.remove("changed"), 500);
+  }
+  if (state.lastCurrency.star !== s && state.lastCurrency.star !== 0) {
+    starEl.classList.add("changed");
+    setTimeout(() => starEl.classList.remove("changed"), 500);
+  }
+  state.lastCurrency = { money: m, gold: g, star: s };
+
+  const totalItems = state.inventory.reduce((s, i) => s + (i.qty || 0), 0);
+  const myListings = state.listings.filter(l => l.ownerId === state.user?.uid);
+  if ($("statInventory")) $("statInventory").textContent = totalItems;
+  if ($("statListings")) $("statListings").textContent = state.listings.length;
+  if ($("statMyListings")) $("statMyListings").textContent = myListings.length;
+}
+
 /* ========= AUTH ========= */
 $("btnLogin").onclick = async () => {
   const email = $("authEmail").value.trim();
@@ -397,7 +820,6 @@ $("btnLogin").onclick = async () => {
   } catch (e) {
     let msg = e.message;
     if (e.code === "auth/invalid-credential") msg = "Email atau password salah";
-    else if (e.code === "auth/user-not-found") msg = "Akun tidak ditemukan";
     showToast("❌ " + msg);
   } finally { showLoading(false); }
 };
@@ -413,7 +835,6 @@ $("btnRegister").onclick = async () => {
   } catch (e) {
     let msg = e.message;
     if (e.code === "auth/email-already-in-use") msg = "Email sudah terdaftar";
-    else if (e.code === "auth/invalid-email") msg = "Email tidak valid";
     showToast("❌ " + msg);
   } finally { showLoading(false); }
 };
@@ -426,12 +847,11 @@ $("btnGuest").onclick = async () => {
   finally { showLoading(false); }
 };
 
-$("btnLogout").onclick = async () => {
-  if (!confirm("Yakin logout? Guest yang logout tidak bisa masuk kembali ke akun ini.")) return;
-  await signOut(auth);
+$("btnLogout").onclick = () => {
+  showConfirm("🚪 Logout", "Yakin mau keluar? Guest yang logout tidak bisa masuk kembali.", () => signOut(auth), "Logout");
 };
 
-/* ========= AUTH STATE LISTENER ========= */
+/* ========= AUTH LISTENER ========= */
 onAuthStateChanged(auth, async (user) => {
   if (user) {
     state.user = user;
@@ -440,16 +860,17 @@ onAuthStateChanged(auth, async (user) => {
     subscribeProfile(user.uid);
     subscribeInventory(user.uid);
     subscribeListings();
+    subscribeChats();
+    checkDailyLogin(user.uid);
   } else {
     state.user = null;
     $("authScreen").style.display = "flex";
-    if (state.unsubProfile) state.unsubProfile();
-    if (state.unsubInventory) state.unsubInventory();
-    if (state.unsubListings) state.unsubListings();
+    ["unsubProfile","unsubInventory","unsubListings","unsubChats","unsubMessages","unsubMissions"]
+      .forEach(k => { if (state[k]) { state[k](); state[k] = null; } });
   }
 });
 
-/* ========= PROFIL USER ========= */
+/* ========= PROFIL ========= */
 async function ensureProfile(user) {
   const ref = doc(db, "users", user.uid);
   const snap = await getDoc(ref);
@@ -461,19 +882,14 @@ async function ensureProfile(user) {
       desc: "Pemain baru Epic Market.",
       money: 100000,
       gold: 10,
-      star: 5,
+      star: 0,       // ⭐ STAR DIHAPUS untuk pemain baru
       isGuest: user.isAnonymous,
+      totalSales: 0,
+      claimedMissions: [],
+      redeemedCodes: [],
       createdAt: serverTimestamp(),
     });
-    // Beri starter item agar market bisa berjalan (opsional, nanti dihapus jika admin seed)
-    await setDoc(doc(db, "inventory", user.uid, "items", "apel"),
-      { qty: 10, updatedAt: serverTimestamp() });
-    await setDoc(doc(db, "inventory", user.uid, "items", "strawberry"),
-      { qty: 5, updatedAt: serverTimestamp() });
-    await setDoc(doc(db, "inventory", user.uid, "items", "asteroid"),
-      { qty: 2, updatedAt: serverTimestamp() });
-    await setDoc(doc(db, "inventory", user.uid, "items", "necklace"),
-      { qty: 1, updatedAt: serverTimestamp() });
+    // ✅ Item starter DIHAPUS — pemain mulai dari 0
   }
 }
 
@@ -484,20 +900,10 @@ function subscribeProfile(uid) {
     state.profile = snap.data();
     updateCurrencyUI();
     renderProfile();
+    renderMissions();
+    renderRedeemHistory();
     $("welcomeName").textContent = state.profile.name;
   });
-}
-
-function updateCurrencyUI() {
-  $("moneyDisplay").textContent = "💵 " + (state.profile.money || 0).toLocaleString('id-ID');
-  $("goldDisplay").textContent = "🪙 " + (state.profile.gold || 0);
-  $("starDisplay").textContent = "⭐ " + (state.profile.star || 0);
-
-  const totalItems = state.inventory.reduce((s, i) => s + (i.qty || 0), 0);
-  const myListings = state.listings.filter(l => l.ownerId === state.user?.uid);
-  $("statInventory").textContent = totalItems;
-  $("statListings").textContent = state.listings.length;
-  $("statMyListings").textContent = myListings.length;
 }
 
 /* ========= INVENTORY ========= */
@@ -513,7 +919,7 @@ function subscribeInventory(uid) {
   });
 }
 
-/* ========= LISTINGS (MARKET) ========= */
+/* ========= LISTINGS ========= */
 function subscribeListings() {
   if (state.unsubListings) state.unsubListings();
   const q = query(collection(db, "listings"));
@@ -527,14 +933,190 @@ function subscribeListings() {
   });
 }
 
+/* ========= CHAT ========= */
+function subscribeChats() {
+  if (state.unsubChats) state.unsubChats();
+  const q = query(collection(db, "chats"), where("participants", "array-contains", state.user.uid));
+  state.unsubChats = onSnapshot(q, (snap) => {
+    state.chats = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderChatList();
+  }, (err) => console.warn("Chat listen err:", err));
+}
+
+async function startChatWithSeller(sellerId, sellerName, listingId, itemId) {
+  if (sellerId === state.user.uid) return showToast("❌ Ini listingmu sendiri!");
+
+  // cek apakah chat sudah ada
+  const existing = state.chats.find(c =>
+    c.participants.includes(sellerId) && c.participants.includes(state.user.uid)
+  );
+  if (existing) {
+    openChatWindow(existing.id);
+    return;
+  }
+
+  // buat chat baru
+  const chatId = [state.user.uid, sellerId].sort().join("_");
+  try {
+    await setDoc(doc(db, "chats", chatId), {
+      participants: [state.user.uid, sellerId],
+      participantsData: {
+        [state.user.uid]: { name: state.profile.name },
+        [sellerId]: { name: sellerName },
+      },
+      lastMessage: "",
+      lastAt: serverTimestamp(),
+      createdAt: serverTimestamp(),
+      unread: { [sellerId]: 0, [state.user.uid]: 0 },
+      contextListing: listingId || null,
+      contextItem: itemId || null,
+    }, { merge: true });
+    openChatWindow(chatId);
+    // Trigger misi chat
+    await triggerMission("first_chat");
+  } catch (e) {
+    showToast("❌ Gagal buka chat: " + e.message);
+  }
+}
+
+function renderChatList() {
+  const list = $("chatList");
+  const badge = $("chatBadge");
+
+  if (state.chats.length === 0) {
+    list.innerHTML = `<div class="empty">Belum ada chat.<br><small>Chat penjual dari detail item di Market.</small></div>`;
+    badge.innerHTML = "";
+    return;
+  }
+
+  let totalUnread = 0;
+  const sorted = [...state.chats].sort((a, b) => (b.lastAt?.seconds || 0) - (a.lastAt?.seconds || 0));
+
+  list.innerHTML = sorted.map(c => {
+    const otherId = c.participants.find(p => p !== state.user.uid);
+    const otherData = c.participantsData?.[otherId] || {};
+    const unread = c.unread?.[state.user.uid] || 0;
+    if (unread > 0) totalUnread += unread;
+    return `
+      <div class="chat-room-item" onclick="openChatWindow('${c.id}')">
+        <div class="room-info">
+          <div class="room-name">👤 ${otherData.name || "?"}</div>
+          <div class="room-preview">${c.lastMessage || "Belum ada pesan"}</div>
+        </div>
+        ${unread > 0 ? `<div class="room-badge">${unread}</div>` : ""}
+      </div>
+    `;
+  }).join("");
+
+  badge.innerHTML = totalUnread > 0 ? `<span class="notif-dot"></span>` : "";
+}
+
+function openChatWindow(chatId) {
+  const chat = state.chats.find(c => c.id === chatId);
+  if (!chat) return;
+  state.currentChat = chat;
+
+  const otherId = chat.participants.find(p => p !== state.user.uid);
+  const otherData = chat.participantsData?.[otherId] || {};
+  $("chatPartnerName").textContent = otherData.name || "?";
+
+  $("chatListView").style.display = "none";
+  $("chatWindowView").style.display = "block";
+
+  // reset unread
+  updateDoc(doc(db, "chats", chatId), {
+    [`unread.${state.user.uid}`]: 0,
+  }).catch(() => {});
+
+  subscribeMessages(chatId);
+}
+window.openChatWindow = openChatWindow;
+
+function closeChatWindow() {
+  $("chatListView").style.display = "block";
+  $("chatWindowView").style.display = "none";
+  if (state.unsubMessages) { state.unsubMessages(); state.unsubMessages = null; }
+  state.currentChat = null;
+}
+window.closeChatWindow = closeChatWindow;
+
+function subscribeMessages(chatId) {
+  if (state.unsubMessages) state.unsubMessages();
+  const q = query(collection(db, "chats", chatId, "messages"), orderBy("createdAt", "asc"), limit(100));
+  state.unsubMessages = onSnapshot(q, (snap) => {
+    const msgs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderMessages(msgs);
+  });
+}
+
+function renderMessages(msgs) {
+  const cont = $("chatMessages");
+  if (msgs.length === 0) {
+    cont.innerHTML = `<div style="text-align:center; color:#8b93a7; font-size:0.8rem; padding:20px;">Belum ada pesan. Mulai chat!</div>`;
+    return;
+  }
+  cont.innerHTML = msgs.map(m => {
+    const mine = m.senderId === state.user.uid;
+    const time = m.createdAt?.seconds
+      ? new Date(m.createdAt.seconds * 1000).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
+      : "";
+    return `
+      <div class="chat-msg ${mine ? "mine" : "theirs"}">
+        ${escapeHtml(m.text)}
+        <span class="time">${time}</span>
+      </div>
+    `;
+  }).join("");
+  cont.scrollTop = cont.scrollHeight;
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+
+async function sendChatMessage() {
+  const input = $("chatInput");
+  const text = input.value.trim();
+  if (!text || !state.currentChat) return;
+  input.value = "";
+
+  const chatId = state.currentChat.id;
+  const chat = state.currentChat;
+  const otherId = chat.participants.find(p => p !== state.user.uid);
+
+  try {
+    await addDoc(collection(db, "chats", chatId, "messages"), {
+      senderId: state.user.uid,
+      senderName: state.profile.name,
+      text,
+      createdAt: serverTimestamp(),
+    });
+
+    await updateDoc(doc(db, "chats", chatId), {
+      lastMessage: text.slice(0, 60),
+      lastAt: serverTimestamp(),
+      [`unread.${otherId}`]: increment(1),
+    });
+  } catch (e) {
+    showToast("❌ Gagal kirim: " + e.message);
+  }
+}
+window.sendChatMessage = sendChatMessage;
+
+$("chatInput")?.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") sendChatMessage();
+});
+
 /* ========= NAVIGASI ========= */
 function switchTab(tab) {
   document.querySelectorAll("nav button").forEach(b =>
     b.classList.toggle("active", b.dataset.tab === tab));
-  ["home", "market", "account"].forEach(t => {
+  ["home", "market", "chat", "redeem", "account"].forEach(t => {
     $("tab-" + t).style.display = (t === tab) ? "block" : "none";
   });
-  if (tab === "account") renderProfile();
+  if (tab === "account") { renderProfile(); renderTransactions(); }
+  if (tab === "redeem") renderRedeemHistory();
+  if (tab === "home") renderMissions();
   updateCurrencyUI();
 }
 window.switchTab = switchTab;
@@ -561,13 +1143,20 @@ document.querySelectorAll('.sub-tabs button[data-mgm]').forEach(btn => {
     const m = btn.dataset.mgm;
     $("mgm-inv").style.display = m === "inv" ? "block" : "none";
     $("mgm-listings").style.display = m === "listings" ? "block" : "none";
-    if (m === "inv") renderInventory();
-    if (m === "listings") renderMyListings();
   });
 });
 
-/* ========= RENDER MARKET ========= */
+/* ========= COLLAPSIBLE CRITERIA ========= */
+function toggleCriteria() {
+  const box = $("criteriaBox");
+  box.classList.toggle("collapsed");
+}
+window.toggleCriteria = toggleCriteria;
+
+/* ========= FILTER & SORT ========= */
 let currentFilter = "all";
+let currentRarity = "all";
+let currentSort = "newest";
 let searchQuery = "";
 
 $("searchInput").addEventListener("input", e => {
@@ -575,11 +1164,27 @@ $("searchInput").addEventListener("input", e => {
   renderMarket();
 });
 
-document.querySelectorAll('.filters button').forEach(btn => {
+document.querySelectorAll('#filterHarga button').forEach(btn => {
   btn.addEventListener("click", () => {
-    document.querySelectorAll('.filters button').forEach(b => b.classList.remove("active"));
+    document.querySelectorAll('#filterHarga button').forEach(b => b.classList.remove("active"));
     btn.classList.add("active");
     currentFilter = btn.dataset.filter;
+    renderMarket();
+  });
+});
+document.querySelectorAll('#filterRarity button').forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll('#filterRarity button').forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    currentRarity = btn.dataset.rarity;
+    renderMarket();
+  });
+});
+document.querySelectorAll('#filterSort button').forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll('#filterSort button').forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    currentSort = btn.dataset.sort;
     renderMarket();
   });
 });
@@ -594,9 +1199,17 @@ function renderMarket() {
       return item && item.name.toLowerCase().includes(searchQuery);
     });
   }
+  if (currentRarity !== "all") {
+    visible = visible.filter(l => getItem(l.itemId)?.rarity === currentRarity);
+  }
   if (currentFilter === "cheap") visible = visible.filter(l => l.price <= 20000);
   else if (currentFilter === "expensive") visible = visible.filter(l => l.price >= 100000);
-  else if (currentFilter === "popular") visible.sort((a, b) => (b.views || 0) - (a.views || 0));
+  else if (currentFilter === "mid") visible = visible.filter(l => l.price > 20000 && l.price < 100000);
+
+  if (currentSort === "popular") visible.sort((a, b) => (b.views || 0) - (a.views || 0));
+  else if (currentSort === "priceAsc") visible.sort((a, b) => a.price - b.price);
+  else if (currentSort === "priceDesc") visible.sort((a, b) => b.price - a.price);
+  else visible.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
 
   if (visible.length === 0) {
     grid.innerHTML = `<div class="empty">
@@ -610,6 +1223,7 @@ function renderMarket() {
     const item = getItem(l.itemId);
     if (!item) return "";
     const mine = l.ownerId === state.user.uid;
+    const sellerBadge = getSellerBadge(l.sellerTotalSales || 0);
     return `
       <div class="item-card ${rarityClass(item.rarity)}" onclick="openItemDetail('${l.id}')">
         <span class="badge">${item.rarity}</span>
@@ -617,9 +1231,18 @@ function renderMarket() {
         <div class="item-name">${item.name}</div>
         <div class="item-price">${formatMoney(l.price)}</div>
         <div class="item-stock">Stok: ${l.stock} • 👁️ ${l.views || 0}</div>
-        <div class="owner-tag">${mine ? "🏠 Milikmu" : "👤 " + (l.sellerName || "?")}</div>
+        <div class="owner-tag">
+          ${mine ? "🏠 Milikmu" : "👤 " + (l.sellerName || "?") + " " + sellerBadge.icon}
+        </div>
       </div>`;
   }).join("");
+}
+
+function getSellerBadge(count) {
+  if (count >= 100) return { icon: "💎", label: "Master" };
+  if (count >= 20) return { icon: "🥇", label: "Terpercaya" };
+  if (count >= 5) return { icon: "🥈", label: "Aktif" };
+  return { icon: "🥉", label: "Baru" };
 }
 
 /* ========= DETAIL ITEM ========= */
@@ -628,12 +1251,12 @@ async function openItemDetail(listingId) {
   if (!listing) return;
   state.currentListing = listing;
 
-  // increment views (fire & forget)
   try { await updateDoc(doc(db, "listings", listingId), { views: increment(1) }); }
-  catch (e) { /* ignore */ }
+  catch (e) {}
 
   const item = getItem(listing.itemId);
   const mine = listing.ownerId === state.user.uid;
+  const badge = getSellerBadge(listing.sellerTotalSales || 0);
 
   $("itemModalContent").innerHTML = `
     <div class="item-card ${rarityClass(item.rarity)}" style="margin-bottom:10px;">
@@ -642,7 +1265,12 @@ async function openItemDetail(listingId) {
       <div class="item-name">${item.name}</div>
     </div>
     <div class="row"><span>Harga</span><b>${formatMoney(listing.price)}</b></div>
-    <div class="row"><span>Penjual</span><b>${listing.sellerName || "?"}${mine ? " (Kamu)" : ""}</b></div>
+    <div class="row"><span>Penjual</span>
+      <b style="cursor:pointer; color:#ffd76a;"
+         onclick="openPublicProfile('${listing.ownerId}', '${escapeHtml(listing.sellerName || "?")}')">
+        ${escapeHtml(listing.sellerName || "?")} ${badge.icon} ${mine ? "(Kamu)" : ""}
+      </b>
+    </div>
     <div class="row"><span>Stok</span><b>${listing.stock}</b></div>
     <div class="row"><span>Kupon</span><b>${listing.allowCoupon ? "✅ Diizinkan" : "❌ Tidak"}</b></div>
   `;
@@ -650,11 +1278,13 @@ async function openItemDetail(listingId) {
   if (mine) {
     $("itemModalActions").innerHTML = `
       <button class="btn btn-secondary" onclick="closeModal('itemModal')">Tutup</button>
-      <button class="btn btn-danger" onclick="withdrawListing('${listing.id}')">🔄 Tarik Listing</button>
+      <button class="btn btn-primary" onclick="openPriceChange('${listing.id}')">💸 Turunkan Harga</button>
+      <button class="btn btn-danger" onclick="withdrawListing('${listing.id}')">🔄 Tarik</button>
     `;
   } else {
     $("itemModalActions").innerHTML = `
-      <button class="btn btn-secondary" onclick="closeModal('itemModal')">Tutup</button>
+      <button class="btn btn-secondary" onclick="openPublicProfile('${listing.ownerId}', '${escapeHtml(listing.sellerName || "?")}')">👤 Profil</button>
+      <button class="btn btn-secondary" onclick="startChatWithSeller('${listing.ownerId}', '${escapeHtml(listing.sellerName || "?")}', '${listing.id}', '${listing.itemId}')">💬 Chat</button>
       <button class="btn btn-primary" onclick="askBuyQuantity('${listing.id}')">🛍️ Beli</button>
     `;
   }
@@ -663,31 +1293,71 @@ async function openItemDetail(listingId) {
 }
 window.openItemDetail = openItemDetail;
 
-/* ========= BELI (TRANSACTION ATOMIK) ========= */
+/* ========= PROFIL PUBLIK ========= */
+async function openPublicProfile(uid, fallbackName) {
+  closeModal("itemModal");
+  showLoading(true, "Memuat profil...");
+  try {
+    const snap = await getDoc(doc(db, "users", uid));
+    let p = snap.exists() ? snap.data() : { name: fallbackName, desc: "-", uid };
+    const listingsCount = state.listings.filter(l => l.ownerId === uid).length;
+    const badge = getSellerBadge(p.totalSales || 0);
+
+    $("publicProfileContent").innerHTML = `
+      <div class="public-profile-avatar">👤</div>
+      <h3 style="text-align:center;">${escapeHtml(p.name || "?")} ${badge.icon}</h3>
+      <div style="text-align:center; color:#8b93a7; font-size:0.75rem; margin-bottom:10px;">
+        UID: ${p.uid || uid}
+      </div>
+      <div class="row"><span>Badge</span><b>${badge.icon} ${badge.label}</b></div>
+      <div class="row"><span>Total Penjualan</span><b>${p.totalSales || 0}x</b></div>
+      <div class="row"><span>Listing Aktif</span><b>${listingsCount}</b></div>
+      <div style="margin-top:10px; padding-top:10px; border-top:1px solid #2a2f3a;">
+        <div style="font-size:0.75rem; color:#8b93a7; margin-bottom:4px;">Deskripsi:</div>
+        <div style="font-size:0.85rem; color:#b8c0d0; line-height:1.4;">${escapeHtml(p.desc || "-")}</div>
+      </div>
+    `;
+    $("chatSellerBtn").onclick = () => {
+      closeModal("publicProfileModal");
+      startChatWithSeller(uid, p.name || fallbackName, null, null);
+    };
+    $("publicProfileModal").classList.add("show");
+  } catch (e) {
+    showToast("❌ Gagal buka profil: " + e.message);
+  } finally { showLoading(false); }
+}
+window.openPublicProfile = openPublicProfile;
+
+/* ========= BELI (TRANSACTION) ========= */
 function askBuyQuantity(listingId) {
   const listing = state.listings.find(l => l.id === listingId);
   if (!listing || listing.stock < 1) return showToast("❌ Stok habis!");
-  if (listing.ownerId === state.user.uid) return showToast("❌ Tidak bisa beli item sendiri!");
+  if (listing.ownerId === state.user.uid) return showToast("❌ Tidak bisa beli sendiri!");
 
   const item = getItem(listing.itemId);
-  const qty = prompt(`Beli berapa ${item.name}? (maks ${listing.stock})`, "1");
-  if (qty === null) return;
-  const q = parseInt(qty);
-  if (isNaN(q) || q < 1 || q > listing.stock) return showToast("❌ Jumlah tidak valid!");
+  showPrompt(
+    `🛍️ Beli ${item.name}`,
+    `Maks. ${listing.stock} item. Harga: ${formatMoney(listing.price)}/item`,
+    (val) => {
+      const q = parseInt(val);
+      if (isNaN(q) || q < 1 || q > listing.stock) return showToast("❌ Jumlah tidak valid!");
+      const total = listing.price * q;
+      if (state.profile.money < total) return showToast("❌ Money tidak cukup!");
 
-  const total = listing.price * q;
-  if (state.profile.money < total) return showToast("❌ Money tidak cukup!");
-
-  $("confirmBuyContent").innerHTML = `
-    <div class="row"><span>Item</span><b>${item.emoji} ${item.name}</b></div>
-    <div class="row"><span>Jumlah</span><b>${q}x</b></div>
-    <div class="row"><span>Harga Satuan</span><b>${formatMoney(listing.price)}</b></div>
-    <div class="row"><span>Total Bayar</span><b style="color:#ffd76a;">${formatMoney(total)}</b></div>
-    <div class="row"><span>Penjual</span><b>${listing.sellerName}</b></div>
-  `;
-  $("confirmBuyBtn").onclick = () => executeBuy(listing.id, q);
-  closeModal("itemModal");
-  $("confirmBuyModal").classList.add("show");
+      $("confirmBuyContent").innerHTML = `
+        <div class="row"><span>Item</span><b>${item.emoji} ${item.name}</b></div>
+        <div class="row"><span>Jumlah</span><b>${q}x</b></div>
+        <div class="row"><span>Harga Satuan</span><b>${formatMoney(listing.price)}</b></div>
+        <div class="row"><span>Total</span><b style="color:#ffd76a;">${formatMoney(total)}</b></div>
+        <div class="row"><span>Penjual</span><b>${escapeHtml(listing.sellerName || "?")}</b></div>
+      `;
+      $("confirmBuyBtn").onclick = () => executeBuy(listing.id, q);
+      closeModal("itemModal");
+      $("confirmBuyModal").classList.add("show");
+    },
+    `Maksimal: ${listing.stock}`,
+    "1"
+  );
 }
 window.askBuyQuantity = askBuyQuantity;
 
@@ -701,9 +1371,8 @@ async function executeBuy(listingId, qty) {
       const listingSnap = await trx.get(listingRef);
       if (!listingSnap.exists()) throw new Error("Listing sudah tidak ada");
       const listing = listingSnap.data();
-
       if (listing.stock < qty) throw new Error("Stok tidak cukup");
-      if (listing.ownerId === state.user.uid) throw new Error("Tidak bisa beli item sendiri");
+      if (listing.ownerId === state.user.uid) throw new Error("Tidak bisa beli sendiri");
 
       const buyerSnap = await trx.get(buyerRef);
       if (!buyerSnap.exists()) throw new Error("Profil buyer tidak ditemukan");
@@ -715,15 +1384,21 @@ async function executeBuy(listingId, qty) {
       const sellerRef = doc(db, "users", listing.ownerId);
       const sellerSnap = await trx.get(sellerRef);
 
-      // 1. Buyer bayar
       trx.update(buyerRef, { money: increment(-total) });
-
-      // 2. Seller terima uang (jika bukan bot & user exist)
-      if (sellerSnap.exists() && listing.ownerId !== state.user.uid) {
-        trx.update(sellerRef, { money: increment(total) });
+      if (sellerSnap.exists()) {
+        trx.update(sellerRef, {
+          money: increment(total),
+          totalSales: increment(qty),
+        });
       }
 
-      // 3. Transfer item ke inventory buyer
+      // update listing.sellerTotalSales agar badge tampil benar
+      trx.update(listingRef, {
+        stock: listing.stock - qty <= 0 ? 0 : listing.stock - qty,
+        sellerTotalSales: (listing.sellerTotalSales || 0) + qty,
+      });
+      if (listing.stock - qty <= 0) trx.delete(listingRef);
+
       const buyerItemRef = doc(db, "inventory", state.user.uid, "items", listing.itemId);
       const buyerItemSnap = await trx.get(buyerItemRef);
       if (buyerItemSnap.exists()) {
@@ -732,37 +1407,23 @@ async function executeBuy(listingId, qty) {
         trx.set(buyerItemRef, { qty, updatedAt: serverTimestamp() });
       }
 
-      // 4. Kurangi stok listing, atau hapus jika habis
-      const newStock = listing.stock - qty;
-      if (newStock <= 0) {
-        trx.delete(listingRef);
-      } else {
-        trx.update(listingRef, { stock: newStock });
-      }
-
-      // 5. Catat log transaksi
       const trxRef = doc(collection(db, "transactions"));
       trx.set(trxRef, {
         buyerId: state.user.uid,
         buyerName: buyer.name || "?",
         sellerId: listing.ownerId,
         sellerName: listing.sellerName || "?",
-        listingId,
-        itemId: listing.itemId,
-        qty,
-        price: listing.price,
-        total,
+        listingId, itemId: listing.itemId,
+        qty, price: listing.price, total,
         createdAt: serverTimestamp(),
       });
     });
 
     closeModal("confirmBuyModal");
-    showToast(`✅ Berhasil beli ${qty}x ${getItem(state.currentListing?.itemId)?.name || "item"}!`);
+    showToast(`✅ Berhasil beli!`);
   } catch (e) {
-    showToast("❌ " + (e.message || "Gagal transaksi"));
-  } finally {
-    showLoading(false);
-  }
+    showToast("❌ " + (e.message || "Gagal"));
+  } finally { showLoading(false); }
 }
 
 /* ========= INVENTORY RENDER ========= */
@@ -772,7 +1433,6 @@ function renderInventory() {
     grid.innerHTML = `<div class="empty">Inventaris kosong.<br><small>Beli item dulu di Pasar.</small></div>`;
     return;
   }
-
   grid.innerHTML = state.inventory.map(inv => {
     const item = getItem(inv.id);
     if (!item) return "";
@@ -786,7 +1446,7 @@ function renderInventory() {
   }).join("");
 }
 
-/* ========= JUAL ITEM ========= */
+/* ========= JUAL ========= */
 function openSell(itemId) {
   const inv = state.inventory.find(i => i.id === itemId);
   const item = getItem(itemId);
@@ -810,34 +1470,28 @@ async function confirmSell() {
   const item = getItem(state.sellTarget.itemId);
 
   if (isNaN(price) || price <= 0) return showToast("❌ Harga tidak valid!");
-  if (price > item.max) return showToast(`❌ Harga melebihi harga pasar (maks ${formatMoney(item.max)})`);
+  if (price > item.max) return showToast(`❌ Maks ${formatMoney(item.max)}`);
   if (isNaN(stock) || stock < 1) return showToast("❌ Stok tidak valid!");
-  if (stock > state.sellTarget.maxQty) return showToast(`❌ Stok melebihi jumlah item (${state.sellTarget.maxQty})`);
+  if (stock > state.sellTarget.maxQty) return showToast(`❌ Maks ${state.sellTarget.maxQty}`);
 
   showLoading(true, "Memasang listing...");
   try {
     await runTransaction(db, async (trx) => {
       const invRef = doc(db, "inventory", state.user.uid, "items", state.sellTarget.itemId);
       const invSnap = await trx.get(invRef);
-      if (!invSnap.exists()) throw new Error("Item tidak ditemukan di inventory");
+      if (!invSnap.exists()) throw new Error("Item tidak ditemukan");
       const currentQty = invSnap.data().qty || 0;
-      if (currentQty < stock) throw new Error("Stok inventory tidak cukup");
+      if (currentQty < stock) throw new Error("Stok tidak cukup");
 
-      // 1. Potong inventory
-      if (currentQty - stock <= 0) {
-        trx.delete(invRef);
-      } else {
-        trx.update(invRef, { qty: currentQty - stock, updatedAt: serverTimestamp() });
-      }
+      if (currentQty - stock <= 0) trx.delete(invRef);
+      else trx.update(invRef, { qty: currentQty - stock, updatedAt: serverTimestamp() });
 
-      // 2. Buat listing baru
       const listingRef = doc(collection(db, "listings"));
       trx.set(listingRef, {
         itemId: state.sellTarget.itemId,
-        price,
-        stock,
-        initialStock: stock,
+        price, stock, initialStock: stock,
         sellerName: state.profile.name,
+        sellerTotalSales: state.profile.totalSales || 0,
         ownerId: state.user.uid,
         allowCoupon,
         views: 0,
@@ -846,12 +1500,11 @@ async function confirmSell() {
     });
 
     closeModal("sellModal");
-    showToast(`✅ ${stock}x ${item.name} dipasang di market!`);
+    showToast(`✅ ${stock}x ${item.name} dipasang!`);
+    triggerMission("weekly_sell");
   } catch (e) {
-    showToast("❌ " + (e.message || "Gagal jual"));
-  } finally {
-    showLoading(false);
-  }
+    showToast("❌ " + (e.message || "Gagal"));
+  } finally { showLoading(false); }
 }
 window.confirmSell = confirmSell;
 
@@ -860,7 +1513,7 @@ function renderMyListings() {
   const grid = $("myListingsGrid");
   const mine = state.listings.filter(l => l.ownerId === state.user?.uid);
   if (mine.length === 0) {
-    grid.innerHTML = `<div class="empty">Belum ada listing aktif.<br><small>Jual item dari Inventaris.</small></div>`;
+    grid.innerHTML = `<div class="empty">Belum ada listing aktif.</div>`;
     return;
   }
   grid.innerHTML = mine.map(l => {
@@ -890,60 +1543,293 @@ function openMyListing(listingId) {
     </div>
     <div class="row"><span>Harga</span><b>${formatMoney(listing.price)}</b></div>
     <div class="row"><span>Stok Aktif</span><b>${listing.stock}</b></div>
-    <div class="row"><span>Terjual</span><b>${(listing.initialStock||listing.stock) - listing.stock}</b></div>
-    <div class="row"><span>Kupon</span><b>${listing.allowCoupon ? "✅ Diizinkan" : "❌ Tidak"}</b></div>
+    <div class="row"><span>Terjual</span><b>${(listing.initialStock||listing.stock)-listing.stock}</b></div>
   `;
   $("itemModalActions").innerHTML = `
     <button class="btn btn-secondary" onclick="closeModal('itemModal')">Tutup</button>
-    <button class="btn btn-danger" onclick="withdrawListing('${listing.id}')">🔄 Tarik dari Market</button>
+    <button class="btn btn-primary" onclick="openPriceChange('${listing.id}')">💸 Ubah Harga</button>
+    <button class="btn btn-danger" onclick="withdrawListing('${listing.id}')">🔄 Tarik</button>
   `;
   $("itemModal").classList.add("show");
 }
 window.openMyListing = openMyListing;
 
-/* ========= TARIK LISTING ========= */
-async function withdrawListing(listingId) {
+/* ========= TURUNKAN HARGA ========= */
+function openPriceChange(listingId) {
   const listing = state.listings.find(l => l.id === listingId);
   if (!listing) return;
-  if (listing.ownerId !== state.user.uid) return showToast("❌ Ini bukan listingmu!");
-  if (listing.stock < 1) return showToast("❌ Stok sudah habis.");
-  if (!confirm(`Tarik ${listing.stock}x item dari market?`)) return;
+  state.priceTarget = listing;
+  const item = getItem(listing.itemId);
 
-  showLoading(true, "Menarik listing...");
+  $("priceChangeItemName").textContent = `${item.emoji} ${item.name}`;
+  $("currentPriceDisplay").textContent = formatMoney(listing.price);
+  $("newPrice").value = Math.floor(listing.price * 0.9);
+  $("newPriceHint").textContent = `Harga baru harus ≤ ${formatMoney(listing.price)}`;
+
+  closeModal("itemModal");
+  $("priceModal").classList.add("show");
+}
+window.openPriceChange = openPriceChange;
+
+async function confirmPriceChange() {
+  const newPrice = parseInt($("newPrice").value);
+  const listing = state.priceTarget;
+  if (isNaN(newPrice) || newPrice <= 0) return showToast("❌ Harga tidak valid!");
+  if (newPrice >= listing.price) return showToast("❌ Harga baru harus lebih rendah!");
+  if (newPrice < 1) return showToast("❌ Minimal 💵1");
+
+  showLoading(true, "Mengubah harga...");
   try {
-    await runTransaction(db, async (trx) => {
-      const listingRef = doc(db, "listings", listingId);
-      const listingSnap = await trx.get(listingRef);
-      if (!listingSnap.exists()) throw new Error("Listing tidak ada");
-      const l = listingSnap.data();
-      if (l.ownerId !== state.user.uid) throw new Error("Bukan listingmu");
-
-      const kembali = l.stock;
-      const invRef = doc(db, "inventory", state.user.uid, "items", l.itemId);
-      const invSnap = await trx.get(invRef);
-
-      // Kembalikan ke inventory
-      if (invSnap.exists()) {
-        trx.update(invRef, { qty: increment(kembali), updatedAt: serverTimestamp() });
-      } else {
-        trx.set(invRef, { qty: kembali, updatedAt: serverTimestamp() });
-      }
-
-      // Hapus listing
-      trx.delete(listingRef);
+    await updateDoc(doc(db, "listings", listing.id), {
+      price: newPrice,
+      updatedAt: serverTimestamp(),
     });
-
-    closeModal("itemModal");
-    showToast(`🔄 Listing ditarik dari market.`);
+    closeModal("priceModal");
+    showToast(`✅ Harga diubah jadi ${formatMoney(newPrice)}`);
   } catch (e) {
-    showToast("❌ " + (e.message || "Gagal tarik"));
-  } finally {
-    showLoading(false);
-  }
+    showToast("❌ " + e.message);
+  } finally { showLoading(false); }
+}
+window.confirmPriceChange = confirmPriceChange;
+
+/* ========= TARIK LISTING ========= */
+function withdrawListing(listingId) {
+  const listing = state.listings.find(l => l.id === listingId);
+  if (!listing) return;
+  showConfirm("🔄 Tarik Listing",
+    `Tarik ${listing.stock}x ${getItem(listing.itemId).name} kembali ke inventaris?`,
+    async () => {
+      showLoading(true, "Menarik...");
+      try {
+        await runTransaction(db, async (trx) => {
+          const listingRef = doc(db, "listings", listingId);
+          const lSnap = await trx.get(listingRef);
+          if (!lSnap.exists()) throw new Error("Listing hilang");
+          const l = lSnap.data();
+          if (l.ownerId !== state.user.uid) throw new Error("Bukan milikmu");
+          const kembali = l.stock;
+          const invRef = doc(db, "inventory", state.user.uid, "items", l.itemId);
+          const invSnap = await trx.get(invRef);
+          if (invSnap.exists()) {
+            trx.update(invRef, { qty: increment(kembali), updatedAt: serverTimestamp() });
+          } else {
+            trx.set(invRef, { qty: kembali, updatedAt: serverTimestamp() });
+          }
+          trx.delete(listingRef);
+        });
+        closeModal("itemModal");
+        showToast(`🔄 Listing ditarik.`);
+      } catch (e) { showToast("❌ " + e.message); }
+      finally { showLoading(false); }
+    }, "Tarik");
 }
 window.withdrawListing = withdrawListing;
 
-/* ========= PROFIL AKUN ========= */
+/* ========= MISI HARIAN ========= */
+async function checkDailyLogin(uid) {
+  const today = new Date().toISOString().slice(0, 10);
+  const ref = doc(db, "users", uid);
+  const snap = await getDoc(ref);
+  if (!snap.exists()) return;
+  const data = snap.data();
+  if (data.lastLoginDate !== today) {
+    await updateDoc(ref, { lastLoginDate: today, dailyLoginDone: true });
+  } else if (!data.dailyLoginDone) {
+    await updateDoc(ref, { dailyLoginDone: true });
+  }
+}
+
+function renderMissions() {
+  const list = $("missionList");
+  if (!list) return;
+  const claimed = state.profile.claimedMissions || [];
+  const totalSales = state.profile.totalSales || 0;
+  const hasChatted = state.profile.hasChatted === true;
+  const dailyDone = state.profile.dailyLoginDone === true;
+
+  const items = MISSIONS.map(m => {
+    let progress = false, progressText = "";
+    if (m.id === "daily_login") { progress = dailyDone; progressText = dailyDone ? "✔ Selesai" : "Belum login hari ini"; }
+    else if (m.id === "weekly_sell") { progress = totalSales >= 1; progressText = `Penjualan: ${totalSales}/1`; }
+    else if (m.id === "first_sale_bought") { progress = totalSales >= 1; progressText = `Penjualan: ${totalSales}/1`; }
+    else if (m.id === "first_chat") { progress = hasChatted; progressText = hasChatted ? "✔ Selesai" : "Belum chat"; }
+
+    const isClaimed = claimed.includes(m.id);
+    return { ...m, progress, progressText, isClaimed };
+  });
+
+  list.innerHTML = items.map(m => `
+    <div class="mission-card ${m.isClaimed ? 'claimed' : (m.progress ? 'done' : '')}">
+      <div class="mission-icon">${m.icon}</div>
+      <div class="mission-info">
+        <div class="mission-title">${m.title}</div>
+        <div class="mission-reward">🎁 ${m.rewardText}</div>
+        <div class="mission-progress">${m.progressText}</div>
+      </div>
+      ${m.isClaimed
+        ? `<button class="btn mission-btn claimed">✔ Diklaim</button>`
+        : m.progress
+          ? `<button class="btn btn-success mission-btn" onclick="claimMission('${m.id}')">Klaim</button>`
+          : `<button class="btn btn-secondary mission-btn" disabled>Belum</button>`}
+    </div>
+  `).join("");
+
+  // Update info reset
+  const now = new Date();
+  const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+  const diff = tomorrow - now;
+  const h = Math.floor(diff / 3600000);
+  const mnt = Math.floor((diff % 3600000) / 60000);
+  $("missionResetInfo").textContent = `Reset: ${h}j ${mnt}m`;
+}
+
+async function claimMission(missionId) {
+  const m = MISSIONS.find(x => x.id === missionId);
+  if (!m) return;
+  const claimed = state.profile.claimedMissions || [];
+  if (claimed.includes(missionId)) return showToast("❌ Sudah diklaim!");
+
+  showLoading(true, "Mengklaim hadiah...");
+  try {
+    const updates = { claimedMissions: [...claimed, missionId] };
+    if (m.reward.money) updates.money = increment(m.reward.money);
+    if (m.reward.gold) updates.gold = increment(m.reward.gold);
+    if (m.reward.star) updates.star = increment(m.reward.star);
+
+    await updateDoc(doc(db, "users", state.user.uid), updates);
+
+    const rewardDesc = [];
+    if (m.reward.money) rewardDesc.push(`+💵${m.reward.money}`);
+    if (m.reward.gold) rewardDesc.push(`+🪙${m.reward.gold}`);
+    if (m.reward.star) rewardDesc.push(`+⭐${m.reward.star}`);
+
+    showReward("🎁", "Misi Selesai!", rewardDesc.join("  "));
+  } catch (e) {
+    showToast("❌ " + e.message);
+  } finally { showLoading(false); }
+}
+window.claimMission = claimMission;
+
+async function triggerMission(missionId) {
+  if (!state.user) return;
+  try {
+    if (missionId === "first_chat" && !state.profile.hasChatted) {
+      await updateDoc(doc(db, "users", state.user.uid), { hasChatted: true });
+    }
+  } catch (e) {}
+}
+
+/* ========= REDEEM ========= */
+async function redeemCode() {
+  const raw = $("redeemInput").value.trim().toUpperCase();
+  if (!raw) return showToast("❌ Masukkan kode!");
+
+  const config = REDEEM_CODES[raw];
+  if (!config) return showToast("❌ Kode tidak valid!");
+
+  const redeemed = state.profile.redeemedCodes || [];
+  if (redeemed.includes(raw)) return showToast("❌ Kode sudah pernah diklaim!");
+
+  showLoading(true, "Mengklaim kode...");
+  try {
+    const updates = {
+      redeemedCodes: [...redeemed, raw],
+      redeemHistory: [...(state.profile.redeemHistory || []),
+        { code: raw, at: new Date().toISOString() }],
+    };
+
+    const rewardParts = [];
+
+    if (config.type === "random_gold_and_item") {
+      const g = Math.floor(Math.random() * (config.goldMax - config.goldMin + 1)) + config.goldMin;
+      updates.gold = increment(g);
+      rewardParts.push(`+🪙${g}`);
+      if (config.item) {
+        const invRef = doc(db, "inventory", state.user.uid, "items", config.item);
+        const invSnap = await getDoc(invRef);
+        if (invSnap.exists()) {
+          await updateDoc(invRef, { qty: increment(config.qty) });
+        } else {
+          await setDoc(invRef, { qty: config.qty, updatedAt: serverTimestamp() });
+        }
+        const it = getItem(config.item);
+        rewardParts.push(`+${it.emoji}${config.qty}`);
+      }
+    } else {
+      if (config.money) { updates.money = increment(config.money); rewardParts.push(`+💵${config.money.toLocaleString('id-ID')}`); }
+      if (config.gold) { updates.gold = increment(config.gold); rewardParts.push(`+🪙${config.gold}`); }
+      if (config.star) { updates.star = increment(config.star); rewardParts.push(`+⭐${config.star}`); }
+      if (config.item) {
+        const invRef = doc(db, "inventory", state.user.uid, "items", config.item);
+        const invSnap = await getDoc(invRef);
+        if (invSnap.exists()) {
+          await updateDoc(invRef, { qty: increment(config.qty) });
+        } else {
+          await setDoc(invRef, { qty: config.qty, updatedAt: serverTimestamp() });
+        }
+        const it = getItem(config.item);
+        rewardParts.push(`+${it.emoji}${config.qty}`);
+      }
+    }
+
+    await updateDoc(doc(db, "users", state.user.uid), updates);
+    $("redeemInput").value = "";
+
+    showReward("🎁", "Kode Berhasil!", rewardParts.join("  "));
+  } catch (e) {
+    showToast("❌ " + e.message);
+  } finally { showLoading(false); }
+}
+window.redeemCode = redeemCode;
+
+function renderRedeemHistory() {
+  const hist = state.profile.redeemHistory || [];
+  const el = $("redeemHistory");
+  if (!el) return;
+  if (hist.length === 0) {
+    el.innerHTML = `<div style="color:#8b93a7; font-size:0.8rem;">Belum ada klaim.</div>`;
+    return;
+  }
+  el.innerHTML = hist.slice().reverse().map(h => {
+    const d = new Date(h.at);
+    return `<div class="redeem-item">
+      <span class="code">${h.code}</span>
+      <span style="color:#8b93a7;">${d.toLocaleDateString('id-ID')}</span>
+    </div>`;
+  }).join("");
+}
+
+/* ========= TRANSAKSI ========= */
+async function renderTransactions() {
+  const el = $("transactionHistory");
+  if (!el) return;
+  el.innerHTML = `<div style="color:#8b93a7; font-size:0.8rem;">Memuat...</div>`;
+  try {
+    const q = query(
+      collection(db, "transactions"),
+      where("buyerId", "==", state.user.uid),
+      orderBy("createdAt", "desc"),
+      limit(20)
+    );
+    const snap = await getDocs(q).catch(() => ({ docs: [] }));
+    const rows = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    if (rows.length === 0) {
+      el.innerHTML = `<div style="color:#8b93a7; font-size:0.8rem;">Belum ada transaksi.</div>`;
+      return;
+    }
+    el.innerHTML = rows.map(t => {
+      const it = getItem(t.itemId);
+      return `<div class="redeem-item">
+        <span>${it?.emoji || "?"} ${t.qty}x</span>
+        <span style="color:#e74c3c;">-${formatMoney(t.total)}</span>
+      </div>`;
+    }).join("");
+  } catch (e) {
+    el.innerHTML = `<div style="color:#8b93a7; font-size:0.8rem;">Gagal memuat.</div>`;
+  }
+}
+
+/* ========= PROFIL ========= */
 function renderProfile() {
   $("profileName").textContent = state.profile.name || "...";
   $("profileUid").textContent = "UID: " + (state.profile.uid || state.user?.uid || "...");
@@ -967,10 +1853,10 @@ async function saveProfile() {
   const name = $("editName").value.trim();
   const desc = $("editDesc").value;
 
-  if (!name) return showToast("❌ Nama tidak boleh kosong!");
-  if (desc.length > 200) return showToast("❌ Deskripsi maksimal 200 karakter!");
-  const emojiRegex = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F02F}]/u;
-  if (emojiRegex.test(desc)) return showToast("❌ Deskripsi tidak boleh mengandung emoji!");
+  if (!name) return showToast("❌ Nama kosong!");
+  if (desc.length > 200) return showToast("❌ Desc max 200!");
+  const emojiRegex = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/u;
+  if (emojiRegex.test(desc)) return showToast("❌ Desc tidak boleh emoji!");
 
   showLoading(true, "Menyimpan...");
   try {
@@ -979,11 +1865,8 @@ async function saveProfile() {
     });
     closeModal("editProfileModal");
     showToast("✅ Profil diperbarui!");
-  } catch (e) {
-    showToast("❌ " + e.message);
-  } finally {
-    showLoading(false);
-  }
+  } catch (e) { showToast("❌ " + e.message); }
+  finally { showLoading(false); }
 }
 window.saveProfile = saveProfile;
 
@@ -993,6 +1876,12 @@ document.querySelectorAll(".modal-overlay").forEach(ov => {
     if (e.target === ov) ov.classList.remove("show");
   });
 });
+
+/* ========= INIT TOAST ANIMATION ========= */
+setTimeout(() => {
+  const t = $("toast");
+  if (t) t.style.transition = "transform 0.35s cubic-bezier(0.16, 1, 0.3, 1)";
+}, 100);
 </script>
 </body>
 </html>
